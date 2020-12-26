@@ -33,7 +33,7 @@ class AddClient(CreateView):
         client.created_by = self.request.user
         client.save()
         messages.success(self.request, 'saved successfully')
-        return redirect('add_client')
+        return redirect('home')
 
     def get_context_data(self, **kwargs):
         kwargs['clients'] = Clientdetails.objects.filter().order_by(('-created_at'))
@@ -50,7 +50,7 @@ class EditClient(UpdateView):
         client.updated_by = self.request.user
         client.save()
         messages.success(self.request, 'updated successfully')
-        return redirect('add_client')
+        return redirect('home')
 
     def get_context_data(self, **kwargs):
         kwargs['clients'] = Clientdetails.objects.filter().order_by(('-created_at'))
@@ -62,7 +62,7 @@ def DeleteClient(request, pk):
     client = get_object_or_404(Clientdetails, pk=int(pk))
     client.delete()
     messages.success(request, 'deleted successfully')
-    return redirect('add_client')
+    return redirect('home')
 
 # endregion
 # --------END OF CLIENT-------
@@ -86,13 +86,22 @@ class AddProject(CreateView):
    
 
     def form_valid(self, form, **kwargs):
-        project = form.save(commit=False)
-        project.created_by = self.request.user
-        project.save()
-        form.save_m2m()
-        messages.success(self.request, 'saved successfully')
-        return redirect('add_project')
+        if form.is_valid():
+            project = form.save(commit=False)
+            project.created_by = self.request.user
+            form.save()
+            form.save_m2m()
+            messages.success(self.request, 'saved successfully')
+            return redirect('add_project')
 
     def get_context_data(self, **kwargs):
         kwargs['projects'] = Projectdetails.objects.filter().order_by(('-created_at'))
         return super(AddProject, self).get_context_data(**kwargs)
+
+
+@login_required
+def DeleteProject(request, pk):
+    project = get_object_or_404(Projectdetails, pk=int(pk))
+    project.delete()
+    messages.success(request, 'deleted successfully')
+    return redirect('add_project')

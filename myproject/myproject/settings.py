@@ -44,6 +44,7 @@ MESSAGE_TAGS = {
 INSTALLED_APPS = [
     'dal',
     'dal_select2',
+    'bootstrap_datepicker_plus',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

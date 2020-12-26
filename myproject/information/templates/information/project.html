@@ -30,7 +30,7 @@
 
             </td>
             <td>
-                <a href="#" title="click to edit">{{ project.projectname }}</a>
+                {{ project.projectname }}
 
             </td>
             <td>
@@ -46,7 +46,7 @@
 
             </td>
             <td class="text-center">
-                {% for user in project.userdata.all %} {{ user.name }} {% endfor %}
+                {% for user in project.userdata.all %} {{ user.username }} {% endfor %}
 
             </td>
             {% if project.is_active %}
@@ -60,7 +60,7 @@
             {% endif %}
 
             <td class="align-middle text-center">
-                <a href="#" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this?')" title="delete client">Delete</a>
+                <a href="{% url 'delete_project' project.pk %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this?')" title="delete client">Delete</a>
             </td>
 
         </tr>

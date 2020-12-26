@@ -30,5 +30,7 @@ urlpatterns = [
     path('project/',views.AddProject.as_view(),name='add_project'),
     path('user-autocomplete/',views.UserAutocomplete.as_view(),name='user-autocomplete'),
     path('project/',views.AddProject.as_view(),name='add_project'),
+    path('project/<int:pk>/delete/',views.DeleteProject,name='delete_project'),
+
     
 ]
