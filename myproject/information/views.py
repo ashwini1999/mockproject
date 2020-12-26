@@ -71,7 +71,7 @@ class UserAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = User.objects.all()
         if self.q:
-            qs = qs.filter(name__istartswith=self.q)
+            qs = qs.filter(username__istartswith=self.q)
 
         return qs
 
@@ -86,13 +86,12 @@ class AddProject(CreateView):
    
 
     def form_valid(self, form, **kwargs):
-        if form.is_valid():
-            project = form.save(commit=False)
-            project.created_by = self.request.user
-            form.save()
-            form.save_m2m()
-            messages.success(self.request, 'saved successfully')
-            return redirect('add_project')
+        project = form.save(commit=False)
+        project.created_by = self.request.user
+        project.save()
+        form.save_m2m()
+        messages.success(self.request, 'saved successfully')
+        return redirect('add_project')
 
     def get_context_data(self, **kwargs):
         kwargs['projects'] = Projectdetails.objects.filter().order_by(('-created_at'))

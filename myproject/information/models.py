@@ -23,7 +23,7 @@ class Projectdetails(models.Model):
     description = models.TextField(max_length=255,verbose_name ='Description')
     complete_date = models.DateField(verbose_name='Completion Date')
     clients = models.ForeignKey(Clientdetails, related_name='projects',on_delete=models.CASCADE)
-    userdata = models.ManyToManyField(User,related_name='userdata',verbose_name ='Users',blank=True)
+    userdata = models.ManyToManyField(User,related_name='projects',verbose_name ='Users',blank=True)
     is_active = models.BooleanField(default=1,verbose_name ='Active')
     created_at = models.DateTimeField(auto_now_add=True,null=True,verbose_name ='Created at')
     updated_at = models.DateTimeField(auto_now=True,null=True,blank=True)

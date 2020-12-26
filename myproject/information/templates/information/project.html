@@ -46,7 +46,7 @@
 
             </td>
             <td class="text-center">
-                {% for user in project.userdata.all %} {{ user.username }} {% endfor %}
+                {% for user in project.userdata.all %} {{ user.username }}, {% endfor %}
 
             </td>
             {% if project.is_active %}
