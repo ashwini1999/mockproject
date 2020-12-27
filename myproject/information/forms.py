@@ -58,7 +58,18 @@ class ProjectForm(forms.ModelForm):
     userdata = forms.ModelMultipleChoiceField(widget=autocomplete.ModelSelect2Multiple(url='user-autocomplete'),queryset=User.objects.filter(is_active=1))
     clients = forms.ModelChoiceField(queryset=Clientdetails.objects.filter(is_active=1))
 
+    def clean_projectname(self):
+        projectname = self.cleaned_data.get('projectname')
+        if projectname.isnumeric():
+            raise forms.ValidationError("Enter a valid name")
+        return projectname
 
+    def clean_complete_date(self):
+        complete_date = self.cleaned_data['complete_date']
+        if complete_date < datetime.date.today():
+            # print(complete_date)
+            raise forms.ValidationError("The date cannot be in the past date")
+        return complete_date
 
     class Meta:
         model = Projectdetails
@@ -69,6 +80,7 @@ class ProjectForm(forms.ModelForm):
         self.helper = FormHelper()  
         self.fields["complete_date"].widget = DatePickerInput()
         self.fields['userdata'].help_text = "Click box to select mulitple users"
+        self.fields['complete_date'].help_text = "The date cannot be the past date"
 
 
         self.helper.layout = Layout(
@@ -86,15 +98,4 @@ class ProjectForm(forms.ModelForm):
         )
    
 
-    def clean_projectname(self):
-        projectname = self.cleaned_data.get('projectname')
-        if projectname.isnumeric():
-            raise forms.ValidationError("Enter a valid name")
-        return projectname
-
-    def clean_complete_date(self):
-        complete_date = self.cleaned_data['complete_date']
-        if complete_date < datetime.date.today():
-            # print(complete_date)
-            raise forms.ValidationError("The date cannot be in the past date")
-        return complete_date
+   
