@@ -1,106 +1,88 @@
-from information.models import Clientdetails,Projectdetails,User
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView,TemplateView,DetailView
-from django.shortcuts import render, redirect, reverse, get_object_or_404
-from .forms import ClientForm,ProjectForm
-from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.db import transaction
-from dal import autocomplete
-
-# Create your views here.
-
-def Projectcount(request):
-    current_user = request.user
-    user_data = current_user.id
-    # print(user_data)
-    for project_data in Projectdetails.objects.all():
-        for user_info in project_data.userdata.filter(id=user_data):
-            user_names= user_info
-            user=Projectdetails.objects.values_list('projectname', flat=True).filter(userdata=user_names)
-            return render(request,  'information/count.html', {'user_project': user,'names':user_names})
-
-# region #--------START OF CLIENT------
-
-@method_decorator(login_required, name='dispatch')
-class AddClient(CreateView):
-    model = Clientdetails
-    form_class = ClientForm
-    template_name = 'information/client.html'
-
-    def form_valid(self, form):
-        client = form.save(commit=False)
-        client.created_by = self.request.user
-        client.save()
-        messages.success(self.request, 'saved successfully')
-        return redirect('home')
-
-    def get_context_data(self, **kwargs):
-        kwargs['clients'] = Clientdetails.objects.filter().order_by(('-created_at'))
-        return super(AddClient, self).get_context_data(**kwargs)
-
-@method_decorator(login_required, name='dispatch')
-class EditClient(UpdateView):
-    model = Clientdetails
-    form_class = ClientForm
-    template_name = 'information/client.html'
-
-    def form_valid(self, form):
-        client = form.save(commit=False)
-        client.updated_by = self.request.user
-        client.save()
-        messages.success(self.request, 'updated successfully')
-        return redirect('home')
-
-    def get_context_data(self, **kwargs):
-        kwargs['clients'] = Clientdetails.objects.filter().order_by(('-created_at'))
-        return super(EditClient, self).get_context_data(**kwargs)
+from django.shortcuts import render
+from django.http import HttpResponse,JsonResponse
+from Information.models import Clientdetails,Projectdetails
+from Information.serializers import ClientSerializer,ProjectSerializer,clientDetailSerializer
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
 
 
-@login_required
-def DeleteClient(request, pk):
-    client = get_object_or_404(Clientdetails, pk=int(pk))
-    client.delete()
-    messages.success(request, 'deleted successfully')
-    return redirect('home')
-
-# endregion
-# --------END OF CLIENT-------
-
-class UserAutocomplete(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        qs = User.objects.all()
-        if self.q:
-            qs = qs.filter(username__istartswith=self.q)
-
-        return qs
+#display client list
+@api_view(['GET'])
+def ClientList(request):
+    clients = Clientdetails.objects.all()
+    serializer = ClientSerializer(clients, many=True)
+    return Response(serializer.data)
 
 
-# region #--------START OF PROJECT-------
+#create client list
+@api_view(['POST'])
+def clientCreate(request):
+    serializer = ClientSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
 
-@method_decorator(login_required, name='dispatch')
-class AddProject(CreateView):
-    model = Projectdetails
-    form_class = ProjectForm
-    template_name = 'information/project.html'
+    return Response(serializer.data)
+
+
+#retrieve info of client with projects 
+@api_view(['GET'])
+def clientDetails(request,pk):  
+    clients = Clientdetails.objects.get(id=pk)
+    projects = Projectdetails.objects.filter(clients=clients)
+    serializer = clientDetailSerializer(projects, many=True)
+    return Response(serializer.data)
    
 
-    def form_valid(self, form, **kwargs):
-        project = form.save(commit=False)
-        project.created_by = self.request.user
-        project.save()
-        form.save_m2m()
-        messages.success(self.request, 'saved successfully')
-        return redirect('add_project')
 
-    def get_context_data(self, **kwargs):
-        kwargs['projects'] = Projectdetails.objects.filter().order_by(('-created_at'))
-        return super(AddProject, self).get_context_data(**kwargs)
+#update client details
+@api_view(['POST'])
+def clientUpdate(request,pk):
+    clients = Clientdetails.objects.get(id=pk)
+    serializer = ClientSerializer(instance=clients,data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+
+    return Response(serializer.data)
 
 
-@login_required
-def DeleteProject(request, pk):
-    project = get_object_or_404(Projectdetails, pk=int(pk))
-    project.delete()
-    messages.success(request, 'deleted successfully')
-    return redirect('add_project')
+#delete client details
+@api_view(['DELETE'])
+def clientDelete(request,pk):
+    clients = Clientdetails.objects.get(id=pk)
+    clients.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+#create projects
+@api_view(['POST'])
+def projectCreate(request,pk):
+    serializer = ProjectSerializer(data=request.data)
+    if serializer.is_valid():
+        client = Clientdetails.objects.get(id=pk)
+        serializer.save(clients=client)      
+      
+    return Response(serializer.data)
+
+
+#logging user data
+@api_view(['GET'])
+def Project(request):
+    current_user = request.user
+    user_data = current_user.id
+    projects = Projectdetails.objects.filter(userdata=user_data)
+    serializer = ProjectSerializer(projects, many=True)
+    return Response(serializer.data)
+
+
+
+
+
+
+
+
+
+
+
+
+

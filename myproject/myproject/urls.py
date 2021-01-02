@@ -15,22 +15,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from information import views
+from Information import views
+from rest_framework.urlpatterns import format_suffix_patterns
 from django.contrib.auth import views as auth_views
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('projectcount/',views.Projectcount,name='count'),
-    path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('client/',views.AddClient.as_view(),name='home'),
-    path('client/<int:pk>/',views.EditClient.as_view(),name='edit_client'),
-    path('client/<int:pk>/delete/',views.DeleteClient,name='delete_client'),
-    path('project/',views.AddProject.as_view(),name='add_project'),
-    path('user-autocomplete/',views.UserAutocomplete.as_view(),name='user-autocomplete'),
-    path('project/',views.AddProject.as_view(),name='add_project'),
-    path('project/<int:pk>/delete/',views.DeleteProject,name='delete_project'),
-
-    
+    path('client-list/', views.ClientList, name='client-list'),
+    path('client-create/', views.clientCreate, name='client-create'),
+    path('client-detail/<str:pk>/', views.clientDetails, name='client-detail'),
+    path('client-update/<str:pk>/', views.clientUpdate, name='client-update'),
+    path('client-delete/<str:pk>/', views.clientDelete, name='client-delete'),
+    path('project-create/<str:pk>/projects', views.projectCreate, name='project-create'),
+    path('projects/', views.Project, name='project'),
 ]
